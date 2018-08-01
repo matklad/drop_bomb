@@ -44,6 +44,7 @@
 use std::borrow::Cow;
 
 #[derive(Debug)]
+#[must_use]
 pub struct DropBomb(RealBomb);
 
 impl DropBomb {
@@ -62,6 +63,7 @@ impl DropBomb {
 }
 
 #[derive(Debug)]
+#[must_use]
 pub struct DebugDropBomb(DebugBomb);
 
 impl DebugDropBomb {
@@ -140,7 +142,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Kaboom")]
     fn armed_bomb_bombs() {
-        DropBomb::new("Kaboom");
+        let _b = DropBomb::new("Kaboom");
     }
 
     #[test]
@@ -162,13 +164,13 @@ mod tests {
     #[should_panic(expected = "Kaboom")]
     #[cfg(debug_assertions)]
     fn debug_bomb_bombs_if_debug() {
-        DebugDropBomb::new("Kaboom");
+        let _b = DebugDropBomb::new("Kaboom");
     }
 
     #[test]
     #[cfg(not(debug_assertions))]
     fn debug_bomb_bombs_if_debug() {
-        DebugDropBomb::new("Kaboom");
+        let _b = DebugDropBomb::new("Kaboom");
     }
 
     #[test]
