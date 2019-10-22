@@ -39,8 +39,8 @@
 //! ## Notes:
 //!
 //! * Bombs do nothing if a thread is already panicking.
-//! * When `#[cfg(debug_assertions)]` is enabled, `DebugDropBomb` is
-//!   an always defused and has a zero size.
+//! * When `#[cfg(debug_assertions)]` is disabled, `DebugDropBomb` is
+//!   always defused and has a zero size.
 use std::borrow::Cow;
 
 #[derive(Debug)]
