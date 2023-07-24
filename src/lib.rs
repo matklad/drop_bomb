@@ -1,3 +1,6 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+#![forbid(unsafe_code)]
+
 //! # drop_bomb
 //!
 //! `drop_bomb` provides two types, `DropBomb` and `DebugDropBomb`,
@@ -36,12 +39,37 @@
 //! }
 //! ```
 //!
+//! # `no-std`
+//!
+//! `drop_bomb` supports building in `no-std` environments
+//! by disabling default features.
+//!
+//! ```toml
+//! [dependencies]
+//! drop_bomb = { version = "...", default-features = false }
+//! ```
+//!
+//! With the default `std` feature enabled, bombs do not panic if
+//! the current thread is already panicking.
+//! However, in `no-std` environments, this check is not possible
+//! in general, so bombs can panic while unwinding from another panic.
+//!
 //! ## Notes:
 //!
-//! * Bombs do nothing if a thread is already panicking.
+//! * Bombs do nothing if a thread is already panicking
+//!   (except in `no-std` mode - see above).
 //! * When `#[cfg(debug_assertions)]` is disabled, `DebugDropBomb` is
 //!   always defused and has a zero size.
-use std::borrow::Cow;
+
+extern crate alloc;
+use alloc::borrow::Cow;
+
+fn currently_panicking() -> bool {
+    #[cfg(feature = "std")]
+    { std::thread::panicking() }
+    #[cfg(not(feature = "std"))]
+    { false } // if we always returned true, this crate would do nothing
+}
 
 #[derive(Debug)]
 #[must_use]
@@ -109,7 +137,7 @@ impl RealBomb {
 
 impl Drop for RealBomb {
     fn drop(&mut self) {
-        if !self.defused && !::std::thread::panicking() {
+        if !self.defused && !currently_panicking() {
             panic!("{}", self.msg)
         }
     }
@@ -194,12 +222,12 @@ mod tests {
     #[test]
     #[cfg(not(debug_assertions))]
     fn debug_bomb_is_zst() {
-        assert_eq!(::std::mem::size_of::<DebugDropBomb>(), 0);
+        assert_eq!(core::mem::size_of::<DebugDropBomb>(), 0);
     }
 
     #[test]
     fn check_traits() {
-        fn assert_traits<T: ::std::fmt::Debug + Send + Sync>() {}
+        fn assert_traits<T: core::fmt::Debug + Send + Sync>() {}
         assert_traits::<DropBomb>();
         assert_traits::<DebugDropBomb>();
     }

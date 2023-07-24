@@ -10,3 +10,7 @@ description = """
 A runtime guard for implementing linear types.
 """
 exclude = ["*.jpg"]
+
+[features]
+default = [ "std" ]
+std = []
